@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VanaRaksha — Tree Plantation Tracker</title>
+  <meta name="description" content="VanaRaksha helps you log, track and visualize tree plantation drives using Google Maps and live GPS." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════════
+       VanaRaksha — Premium Design System
+       ═══════════════════════════════════════════════════════════════ */
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Design Tokens */
+    :root {
+      --forest:        #14532d;
+      --forest-mid:    #166534;
+      --leaf:          #16a34a;
+      --leaf-light:    #22c55e;
+      --lime:          #86efac;
+      --mint:          #dcfce7;
+      --sage:          #f0fdf4;
+
+      --bg:            #f8fafc;
+      --surface:       #ffffff;
+      --surface-raised:#f9fafb;
+      --border:        #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text:          #0f172a;
+      --text-2:        #475569;
+      --text-3:        #94a3b8;
+      --white:         #ffffff;
+
+      --danger:        #dc2626;
+      --danger-bg:     #fef2f2;
+      --warn:          #d97706;
+      --warn-bg:       #fffbeb;
+      --good:          #16a34a;
+      --good-bg:       #f0fdf4;
+      --info:          #2563eb;
+      --info-bg:       #eff6ff;
+
+      --shadow-sm:     0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md:     0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05);
+      --shadow-lg:     0 12px 40px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+      --shadow-green:  0 4px 20px rgba(20,83,45,0.25);
+
+      --r-sm:  6px;
+      --r-md:  10px;
+      --r-lg:  16px;
+      --r-xl:  20px;
+      --r-2xl: 28px;
+      --ease:  cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, var(--forest) 0%, #1a6338 50%, var(--forest-mid) 100%);
+      color: #fff;
+      padding: 0 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset,
+                  0 4px 24px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+      animation: shimmer 7s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes shimmer {
+      0%   { transform: translateX(-100%); }
+      60%, 100% { transform: translateX(220%); }
+    }
+
+    .brand { display: flex; align-items: center; gap: 14px; position: relative; }
+    .brand-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.08));
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      border: 1px solid rgba(255,255,255,0.25);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.15);
+      flex-shrink: 0;
+    }
+    .brand h1 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.45rem;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      line-height: 1.1;
+    }
+    .brand span {
+      font-size: 0.62rem;
+      font-weight: 400;
+      opacity: 0.6;
+      display: block;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 0;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--r-lg);
+      padding: 0.25rem;
+    }
+    .hstat {
+      text-align: center;
+      padding: 0.5rem 1.2rem;
+      border-radius: var(--r-md);
+      transition: background 0.2s var(--ease);
+      position: relative;
+    }
+    .hstat:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0; top: 20%; bottom: 20%;
+      width: 1px;
+      background: rgba(255,255,255,0.14);
+    }
+    .hstat:hover { background: rgba(255,255,255,0.1); }
+    .hstat-num {
+      font-family: 'Lora', serif;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--lime);
+      line-height: 1;
+      letter-spacing: -0.5px;
+    }
+    .hstat-lbl {
+      font-size: 0.58rem;
+      opacity: 0.65;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-top: 3px;
+      font-weight: 500;
+    }
+
+    /* ── NAV TABS ────────────────────────────────────────────────── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 2.5rem;
+      box-shadow: var(--shadow-sm);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      padding: 1rem 1.5rem;
+      border: none;
+      background: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.84rem;
+      font-weight: 500;
+      color: var(--text-2);
+      cursor: pointer;
+      border-bottom: 2.5px solid transparent;
+      transition: all 0.2s var(--ease);
+      display: flex; align-items: center; gap: 7px;
+      white-space: nowrap;
+      letter-spacing: 0.1px;
+    }
+    .tab-btn.active {
+      color: var(--forest);
+      border-bottom-color: var(--leaf);
+      font-weight: 600;
+    }
+    .tab-btn:hover:not(.active) { color: var(--forest); background: var(--sage); }
+    .tab-icon { font-size: 15px; }
+
+    /* ── MAIN ────────────────────────────────────────────────────── */
+    main {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 2.5rem 2.5rem 5rem;
+    }
+    .tab-panel { display: none; animation: fadeIn 0.25s var(--ease); }
+    .tab-panel.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── PAGE HEADER ─────────────────────────────────────────────── */
+    .page-hdr {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-hdr h2 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 5px;
+      letter-spacing: -0.3px;
+    }
+    .page-hdr p { font-size: 0.875rem; color: var(--text-2); }
+    .section-divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+
+    /* ── STAT CARDS ──────────────────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.25rem;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      padding: 1.75rem 1.25rem 1.5rem;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 5px; text-align: center;
+      transition: transform 0.22s var(--ease), box-shadow 0.22s var(--ease), border-color 0.22s var(--ease);
+      position: relative; overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--leaf), var(--lime));
+      opacity: 0;
+      transition: opacity 0.22s var(--ease);
+    }
+    .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--border-strong); }
+    .stat-card:hover::before { opacity: 1; }
+    .stat-icon { font-size: 2rem; margin-bottom: 6px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12)); }
+    .stat-num {
+      font-family: 'Lora', serif;
+      font-size: 2.4rem;
+      font-weight: 600;
+      color: var(--forest);
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+    .stat-label {
+      font-size: 0.71rem;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* ── DASH GRID ───────────────────────────────────────────────── */
+    .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 800px) { .dash-grid { grid-template-columns: 1fr; } }
+
+    /* ── CARD ────────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s var(--ease);
+    }
+    .card:hover { box-shadow: var(--shadow-md); }
+    .card-title {
+      font-family: 'Lora', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--forest);
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.875rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Species chart */
+    .species-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .species-name {
+      width: 120px; font-size: 0.8rem; color: var(--text-2);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;
+    }
+    .bar-wrap { flex: 1; background: var(--sage); border-radius: 100px; height: 10px; overflow: hidden; }
+    .bar-fill {
+      background: linear-gradient(90deg, var(--leaf), var(--lime));
+      height: 100%; border-radius: 100px;
+      transition: width 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+      min-width: 6px;
+    }
+    .bar-count { font-size: 0.78rem; font-weight: 600; color: var(--text-2); width: 26px; text-align: right; }
+
+    /* Activity list */
+    .activity-list { list-style: none; }
+    .activity-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.84rem;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--leaf);
+      margin-top: 5px; flex-shrink: 0;
+      box-shadow: 0 0 0 3px rgba(22,163,74,0.15);
+    }
+    .activity-text { color: var(--text); font-weight: 500; }
+    .activity-date { color: var(--text-3); font-size: 0.76rem; margin-top: 2px; }
+
+    /* Monthly chart */
+    .month-chart { display: flex; align-items: flex-end; gap: 8px; height: 110px; padding-bottom: 4px; }
+    .month-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .month-bar {
+      width: 100%;
+      background: linear-gradient(180deg, var(--lime), var(--leaf));
+      border-radius: 6px 6px 0 0;
+      transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      min-height: 3px; position: relative; cursor: pointer;
+    }
+    .month-bar:hover { filter: brightness(1.1); }
+    .month-bar:hover::after {
+      content: attr(data-count) " planted";
+      position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+      background: var(--forest); color: #fff;
+      padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; white-space: nowrap;
+      pointer-events: none; box-shadow: var(--shadow-sm);
+    }
+    .month-label { font-size: 0.64rem; color: var(--text-3); font-weight: 500; letter-spacing: 0.5px; }
+
+    /* Survival */
+    .survival-bar { background: var(--sage); border-radius: 100px; height: 10px; overflow: hidden; }
+    .survival-fill { height: 100%; border-radius: 100px; background: var(--good); transition: width 0.6s var(--ease); }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--text-3); font-size: 0.875rem; }
+    .empty-icon { font-size: 2.75rem; margin-bottom: 0.75rem; opacity: 0.7; }
+
+    /* ── FORM ────────────────────────────────────────────────────── */
+    .form-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 2rem;
+    }
+    @media (max-width: 800px) { .form-layout { grid-template-columns: 1fr; } }
+
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      padding: 2.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .form-card > h2 {
+      font-family: 'Lora', serif;
+      color: var(--forest);
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1.75rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.2px;
+    }
+    .form-group { margin-bottom: 1.4rem; }
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-2);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 7px;
+    }
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: var(--text);
+      background: var(--surface);
+      transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+      outline: none;
+    }
+    input[type="text"]:hover,
+    input[type="date"]:hover,
+    input[type="number"]:hover,
+    select:hover, textarea:hover { border-color: var(--border-strong); }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--leaf);
+      box-shadow: 0 0 0 3.5px rgba(22,163,74,0.15);
+    }
+    textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ── LOCATION CARD ───────────────────────────────────────────── */
+    .location-card {
+      background: linear-gradient(135deg, var(--sage), var(--mint));
+      border: 1.5px dashed var(--leaf);
+      border-radius: var(--r-lg);
+      padding: 1.75rem 1.5rem;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 12px; text-align: center;
+    }
+    .location-card.captured {
+      border-style: solid;
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    }
+    .location-card .loc-icon {
+      font-size: 2.5rem;
+      filter: drop-shadow(0 2px 6px rgba(22,163,74,0.3));
+    }
+    .location-card p { font-size: 0.83rem; color: var(--text-2); max-width: 240px; line-height: 1.55; }
+
+    #location-status {
+      font-size: 0.83rem; color: var(--forest);
+      font-weight: 500; text-align: center; width: 100%;
+    }
+
+    .btn-geo {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, var(--forest), var(--forest-mid));
+      color: white; border: none; border-radius: var(--r-md);
+      font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      width: 100%; box-shadow: var(--shadow-green); letter-spacing: 0.1px;
+    }
+    .btn-geo:hover {
+      background: linear-gradient(135deg, var(--forest-mid), var(--leaf));
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(20,83,45,0.35);
+    }
+    .btn-geo:active { transform: scale(0.98); }
+    .btn-geo:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .coords-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 100px; padding: 5px 14px;
+      font-size: 0.79rem; color: var(--forest);
+      font-weight: 600; box-shadow: var(--shadow-sm);
+    }
+
+    /* ── BUTTONS ─────────────────────────────────────────────────── */
+    .btn-primary {
+      width: 100%; padding: 0.9rem;
+      background: linear-gradient(135deg, var(--forest), var(--forest-mid));
+      color: white; border: none; border-radius: var(--r-md);
+      font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      letter-spacing: 0.1px; box-shadow: var(--shadow-green); margin-top: 0.5rem;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--forest-mid), var(--leaf));
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(20,83,45,0.35);
+    }
+    .btn-primary:active { transform: scale(0.98); box-shadow: var(--shadow-sm); }
+
+    .btn-secondary {
+      width: 100%; padding: 0.78rem;
+      background: var(--surface-raised);
+      border: 1.5px solid var(--border); border-radius: var(--r-md);
+      font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 500;
+      cursor: pointer; color: var(--text); margin-bottom: 8px;
+      transition: all 0.18s var(--ease);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-secondary:hover { background: var(--surface); border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+
+    .btn-danger {
+      width: 100%; padding: 0.78rem;
+      background: none; border: 1.5px solid #fca5a5; border-radius: var(--r-md);
+      font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 500;
+      cursor: pointer; color: var(--danger); margin-top: 8px;
+      transition: all 0.18s var(--ease);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-danger:hover { background: var(--danger-bg); border-color: var(--danger); }
+
+    /* ── TIPS CARD ───────────────────────────────────────────────── */
+    .tips-card {
+      background: linear-gradient(135deg, var(--sage), var(--mint));
+      border: 1px solid rgba(22,163,74,0.2);
+      border-radius: var(--r-xl);
+      padding: 1.75rem;
+    }
+    .tips-card h3 {
+      font-family: 'Lora', serif; font-size: 1rem; font-weight: 600;
+      color: var(--forest); margin-bottom: 1rem;
+    }
+    .tip-item { display: flex; gap: 10px; margin-bottom: 10px; font-size: 0.84rem; color: var(--text-2); line-height: 1.5; }
+    .tip-dot { color: var(--leaf); font-weight: 700; margin-top: 1px; flex-shrink: 0; }
+
+    /* ── MAP VIEW ────────────────────────────────────────────────── */
+    #big-map {
+      height: 560px;
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow-lg);
+    }
+    .map-legend {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 0.9rem 1.25rem;
+      font-size: 0.82rem; align-items: center;
+      box-shadow: var(--shadow-sm);
+    }
+    .legend-item { display: flex; align-items: center; gap: 7px; color: var(--text-2); font-weight: 500; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+
+    /* ── GROWTH TABLE ────────────────────────────────────────────── */
+    .trees-table-wrap { overflow-x: auto; border-radius: var(--r-xl); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    thead { position: sticky; top: 0; z-index: 1; }
+    th {
+      text-align: left; padding: 0.75rem 1rem;
+      font-size: 0.71rem; font-weight: 700;
+      color: var(--text-2); text-transform: uppercase; letter-spacing: 0.8px;
+      border-bottom: 2px solid var(--border); background: var(--surface-raised);
+      white-space: nowrap;
+    }
+    td { padding: 0.875rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); }
+    tbody tr { transition: background 0.15s var(--ease); }
+    tbody tr:hover td { background: var(--sage); }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 3px 12px; border-radius: 100px;
+      font-size: 0.71rem; font-weight: 600; letter-spacing: 0.3px;
+    }
+    .badge-good { background: var(--good-bg); color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-warn { background: var(--warn-bg); color: #92400e; border: 1px solid #fde68a; }
+    .badge-bad  { background: var(--danger-bg); color: #991b1b; border: 1px solid #fecaca; }
+    .badge-new  { background: var(--info-bg); color: #1d4ed8; border: 1px solid #bfdbfe; }
+
+    .health-btn {
+      padding: 5px 12px; border-radius: var(--r-sm);
+      border: 1.5px solid var(--border); background: none;
+      font-size: 0.75rem; cursor: pointer; color: var(--text-2);
+      font-family: 'Inter', sans-serif; font-weight: 500;
+      transition: all 0.15s var(--ease);
+    }
+    .health-btn:hover { background: var(--sage); color: var(--forest); border-color: var(--leaf); }
+
+    .btn-del {
+      padding: 5px 12px; border-radius: var(--r-sm);
+      border: 1.5px solid #fca5a5; background: none;
+      font-size: 0.75rem; cursor: pointer; color: var(--danger);
+      font-family: 'Inter', sans-serif; font-weight: 500;
+      transition: all 0.15s var(--ease);
+    }
+    .btn-del:hover { background: var(--danger-bg); border-color: var(--danger); }
+
+    .search-bar { display: flex; gap: 10px; margin-bottom: 1.25rem; align-items: center; flex-wrap: wrap; }
+    .search-bar input { flex: 1; min-width: 200px; max-width: 280px; }
+    .search-bar select { min-width: 160px; }
+
+    /* ── ONLINE IMPORT MODAL ──────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 2000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s var(--ease);
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface);
+      border-radius: var(--r-2xl);
+      width: 100%; max-width: 740px;
+      max-height: 90vh;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      box-shadow: var(--shadow-lg), 0 0 0 1px var(--border);
+      transform: translateY(24px) scale(0.97);
+      transition: transform 0.3s var(--ease);
+    }
+    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+    .modal-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--sage), #fff);
+    }
+    .modal-header-left { display: flex; align-items: center; gap: 12px; }
+    .modal-header-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--forest), var(--leaf));
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      box-shadow: var(--shadow-green);
+    }
+    .modal-header h3 {
+      font-family: 'Lora', serif;
+      font-size: 1.15rem; font-weight: 600; color: var(--text);
+    }
+    .modal-header p { font-size: 0.78rem; color: var(--text-3); margin-top: 2px; }
+    .modal-close {
+      width: 36px; height: 36px;
+      border-radius: var(--r-md); border: 1.5px solid var(--border);
+      background: none; cursor: pointer;
+      font-size: 1.1rem; color: var(--text-2);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s var(--ease);
+    }
+    .modal-close:hover { background: var(--surface-raised); color: var(--text); }
+    .modal-body { padding: 1.75rem 2rem; overflow-y: auto; flex: 1; }
+    .modal-footer {
+      padding: 1.1rem 2rem;
+      border-top: 1px solid var(--border);
+      display: flex; gap: 10px; justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      background: var(--surface-raised);
+    }
+    .modal-footer-left { font-size: 0.8rem; color: var(--text-3); }
+    .modal-footer-right { display: flex; gap: 8px; }
+    /* Source tabs */
+    .source-tabs {
+      display: flex; gap: 5px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 4px;
+      margin-bottom: 1.5rem;
+    }
+    .source-tab {
+      flex: 1; padding: 0.55rem 0.5rem;
+      border: none; background: none;
+      border-radius: var(--r-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem; font-weight: 500;
+      color: var(--text-2); cursor: pointer;
+      transition: all 0.18s var(--ease); text-align: center;
+      white-space: nowrap;
+    }
+    .source-tab.active {
+      background: var(--surface); color: var(--forest);
+      font-weight: 600; box-shadow: var(--shadow-sm);
+    }
+    .source-desc {
+      padding: 0.875rem 1rem;
+      background: var(--sage);
+      border: 1px solid rgba(22,163,74,0.2);
+      border-radius: var(--r-md);
+      font-size: 0.82rem; color: var(--text-2);
+      margin-bottom: 1.25rem; line-height: 1.55;
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .source-desc-icon { font-size: 1.2rem; flex-shrink: 0; }
+    /* Filter row */
+    .filter-row {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-bottom: 1rem;
+    }
+    .filter-row .form-group { margin-bottom: 0; }
+    /* Fetch button */
+    .fetch-btn {
+      width: 100%; padding: 0.78rem;
+      background: linear-gradient(135deg, var(--forest), var(--forest-mid));
+      color: white; border: none; border-radius: var(--r-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s var(--ease);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: var(--shadow-green); margin-top: 0.5rem;
+    }
+    .fetch-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .fetch-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    /* Results */
+    .import-results {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .select-all-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.65rem 1rem;
+      border-bottom: 2px solid var(--border);
+      font-size: 0.78rem; font-weight: 700;
+      color: var(--text-2); background: var(--surface-raised);
+      position: sticky; top: 0; z-index: 1;
+    }
+    .select-all-row input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--leaf); }
+    .import-result-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s; cursor: pointer;
+    }
+    .import-result-item:last-child { border-bottom: none; }
+    .import-result-item:hover { background: var(--sage); }
+    .import-result-item input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--leaf); margin-top: 3px; flex-shrink: 0; }
+    .import-result-info { flex: 1; min-width: 0; }
+    .import-result-species { font-weight: 600; font-size: 0.875rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .import-result-meta { font-size: 0.77rem; color: var(--text-3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .import-source-badge {
+      font-size: 0.67rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 100px;
+      flex-shrink: 0; letter-spacing: 0.3px;
+    }
+    .badge-inat { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .badge-gbif { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+    .badge-osm  { background: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
+    .results-status {
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 0.85rem; color: var(--text-3);
+    }
+    /* Footer action buttons */
+    .import-confirm-btn {
+      padding: 0.68rem 1.4rem;
+      background: linear-gradient(135deg, var(--leaf), var(--leaf-light));
+      color: white; border: none; border-radius: var(--r-md);
+      font-family: 'Inter', sans-serif; font-size: 0.875rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s var(--ease);
+      box-shadow: 0 2px 8px rgba(22,163,74,0.3);
+    }
+    .import-confirm-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .import-confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .cancel-btn {
+      padding: 0.68rem 1.2rem;
+      background: none; color: var(--text-2);
+      border: 1.5px solid var(--border); border-radius: var(--r-md);
+      font-family: 'Inter', sans-serif; font-size: 0.875rem; font-weight: 500;
+      cursor: pointer; transition: all 0.18s var(--ease);
+    }
+    .cancel-btn:hover { border-color: var(--border-strong); color: var(--text); }
+
+    /* ── TOAST ───────────────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem;
+      background: linear-gradient(135deg, var(--forest), var(--forest-mid));
+      color: white;
+      padding: 0.9rem 1.6rem;
+      border-radius: var(--r-lg);
+      font-size: 0.875rem; font-weight: 500;
+      opacity: 0; transform: translateY(16px) scale(0.96);
+      transition: all 0.3s var(--ease);
+      z-index: 9999; pointer-events: none;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.15);
+      border: 1px solid rgba(255,255,255,0.12);
+      max-width: 360px;
+    }
+    .toast.show { opacity: 1; transform: translateY(0) scale(1); }
+
+    /* ── SPINNER ─────────────────────────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 15px; height: 15px;
+      border: 2.5px solid rgba(255,255,255,0.35);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── RESPONSIVE ──────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      header { padding: 0 1.25rem; height: 64px; }
+      .hstat { padding: 0.4rem 0.75rem; }
+      .hstat-num { font-size: 1.1rem; }
+      main { padding: 1.5rem 1.25rem 4rem; }
+      nav { padding: 0 0.75rem; }
+      .tab-btn { padding: 0.875rem 1rem; font-size: 0.8rem; }
+      #big-map { height: 380px; }
+      .stats-grid { grid-template-columns: repeat(3, 1fr); }
+      .form-card { padding: 1.5rem; }
+      .page-hdr h2 { font-size: 1.45rem; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .header-stats { display: none; }
+      .brand h1 { font-size: 1.2rem; }
+    }
+
+    /* Google Maps info window */
+    .gm-style .gm-style-iw-c {
+      border-radius: 14px !important;
+      box-shadow: var(--shadow-lg) !important;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="brand">
+    <div class="brand-icon">🌳</div>
+    <div>
+      <h1>VanaRaksha</h1>
+      <span>Tree Plantation Tracker</span>
+    </div>
+  </div>
+
+  <div class="header-stats">
+    <div class="hstat">
+      <div class="hstat-num" id="h-total">0</div>
+      <div class="hstat-lbl">Planted</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-num" id="h-alive">0</div>
+      <div class="hstat-lbl">Surviving</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-num" id="h-species">0</div>
+      <div class="hstat-lbl">Species</div>
+    </div>
+  </div>
+</header>
+
+<!-- ── TABS ── -->
+<nav role="tablist">
+  <button class="tab-btn active" role="tab" onclick="switchTab('dashboard')">
+    <span class="tab-icon">📊</span> Dashboard
+  </button>
+  <button class="tab-btn" role="tab" onclick="switchTab('add')">
+    <span class="tab-icon">🌱</span> Log Planting
+  </button>
+  <button class="tab-btn" role="tab" onclick="switchTab('map')">
+    <span class="tab-icon">🗺️</span> Map View
+  </button>
+  <button class="tab-btn" role="tab" onclick="switchTab('growth')">
+    <span class="tab-icon">📈</span> Growth Tracker
+  </button>
+</nav>
+
+<main>
+
+  <!-- ═══════════════ DASHBOARD ═══════════════ -->
+  <div class="tab-panel active" id="panel-dashboard">
+    <div class="page-hdr">
+      <h2>Overview</h2>
+      <p>Your tree plantation initiative at a glance</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🌳</div>
+        <div class="stat-num" id="s-total">0</div>
+        <div class="stat-label">Total Planted</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💚</div>
+        <div class="stat-num" id="s-alive">0</div>
+        <div class="stat-label">Healthy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-num" id="s-attention">0</div>
+        <div class="stat-label">Need Attention</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔬</div>
+        <div class="stat-num" id="s-species-count">0</div>
+        <div class="stat-label">Species</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📍</div>
+        <div class="stat-num" id="s-locations">0</div>
+        <div class="stat-label">Locations</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-num" id="s-this-month">0</div>
+        <div class="stat-label">This Month</div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="card">
+        <div class="card-title">🌿 Trees by Species</div>
+        <div id="species-chart">
+          <div class="empty-state">
+            <div class="empty-icon">🌱</div>
+            <div>No trees logged yet. Start by adding some!</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📅 Monthly Plantings</div>
+        <div id="monthly-chart">
+          <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <div>No data yet</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🕐 Recent Activity</div>
+        <ul class="activity-list" id="activity-list">
+          <li class="empty-state">
+            <div class="empty-icon">🌱</div>
+            <div>No activity yet</div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💪 Survival Rate</div>
+        <div id="survival-stats">
+          <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <div>No data yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ LOG PLANTING ═══════════════ -->
+  <div class="tab-panel" id="panel-add">
+    <div class="page-hdr">
+      <h2>Log a Tree Planting</h2>
+      <p>Record details of a newly planted tree — GPS coordinates captured from your device</p>
+    </div>
+
+    <div class="form-layout">
+      <!-- Left: Form -->
+      <div class="form-card">
+        <h2>🌱 Tree Details</h2>
+
+        <div class="form-group">
+          <label for="f-species">Tree Species *</label>
+          <input type="text" id="f-species" list="species-list"
+            placeholder="e.g. Neem, Peepal, Banyan…" autocomplete="off" />
+          <datalist id="species-list">
+            <option value="Neem (Azadirachta indica)" />
+            <option value="Peepal (Ficus religiosa)" />
+            <option value="Banyan (Ficus benghalensis)" />
+            <option value="Teak (Tectona grandis)" />
+            <option value="Mango (Mangifera indica)" />
+            <option value="Gulmohar (Delonix regia)" />
+            <option value="Ashoka (Saraca asoca)" />
+            <option value="Bamboo (Bambusoideae)" />
+            <option value="Amla (Phyllanthus emblica)" />
+            <option value="Eucalyptus (Eucalyptus globulus)" />
+            <option value="Pine (Pinus sylvestris)" />
+            <option value="Oak (Quercus robur)" />
+          </datalist>
+        </div>
+
+        <div class="input-row">
+          <div class="form-group">
+            <label for="f-date">Date Planted *</label>
+            <input type="date" id="f-date" />
+          </div>
+          <div class="form-group">
+            <label for="f-qty">Quantity</label>
+            <input type="number" id="f-qty" value="1" min="1" max="1000" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="f-location">Location Name *</label>
+          <input type="text" id="f-location"
+            placeholder="e.g. City Park Block A, College Campus…" />
+        </div>
+
+        <!-- Live GPS -->
+        <div class="form-group">
+          <label>GPS Coordinates</label>
+          <div class="location-card" id="location-card">
+            <div class="loc-icon">📡</div>
+            <p>Tap the button to capture your live GPS location for this tree</p>
+            <button class="btn-geo" id="geo-btn" onclick="requestLiveLocation()">
+              📍 Use My Current Location
+            </button>
+            <div id="location-status"></div>
+            <span class="coords-pill" id="coords-pill" style="display:none;"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="f-planter">Planted By</label>
+          <input type="text" id="f-planter"
+            placeholder="Name, group or organisation…" />
+        </div>
+
+        <div class="form-group">
+          <label for="f-notes">Notes</label>
+          <textarea id="f-notes"
+            placeholder="Soil condition, weather, nearby landmark…"></textarea>
+        </div>
+
+        <button class="btn-primary" onclick="addTree()">
+          🌳 Log This Tree
+        </button>
+      </div>
+
+      <!-- Right: Tips & Actions -->
+      <div style="display:flex;flex-direction:column;gap:1.5rem;">
+        <div class="tips-card">
+          <h3>📋 Quick Tips</h3>
+          <div class="tip-item">
+            <span class="tip-dot">▸</span>
+            Tap "Use My Current Location" to auto-capture GPS — works best outdoors
+          </div>
+          <div class="tip-item">
+            <span class="tip-dot">▸</span>
+            Use the Quantity field to log bulk plantings in a single entry
+          </div>
+          <div class="tip-item">
+            <span class="tip-dot">▸</span>
+            Native Indian species (Neem, Peepal, Banyan) are recommended for EVS projects
+          </div>
+          <div class="tip-item">
+            <span class="tip-dot">▸</span>
+            Include soil type and weather notes for better long-term analysis
+          </div>
+          <div class="tip-item">
+            <span class="tip-dot">▸</span>
+            Update health status anytime from the Growth Tracker tab
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🌍 About VanaRaksha</div>
+          <p style="font-size:0.855rem;color:var(--text-2);line-height:1.75;">
+            VanaRaksha helps document and track tree plantation drives for environmental
+            &amp; EVS initiatives. Data is stored locally in your browser.
+          </p>
+          <div class="section-divider"></div>
+          <p style="font-size:0.8rem;color:var(--text-2);">
+            <strong style="color:var(--forest)">EVS Project</strong> — Environmental Studies<br/>
+            Track college green drives, community plantation events, or personal saplings.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">⚙️ Data Actions</div>
+          <button class="btn-primary" onclick="openImportModal()" style="margin-bottom:10px;background:linear-gradient(135deg,#0369a1,#0ea5e9);box-shadow:0 4px 16px rgba(3,105,161,0.3);">
+            🌐 Import from Web
+          </button>
+          <button class="btn-primary" onclick="exportData()" style="margin-bottom:10px;">
+            ⬇️ Export as JSON
+          </button>
+          <button onclick="importTrigger()" class="btn-secondary">
+            ⬆️ Import Local File
+          </button>
+          <input type="file" id="import-file" accept=".json"
+            style="display:none" onchange="importData(event)" />
+          <button onclick="if(confirm('Delete ALL tree data? This cannot be undone.'))clearAll()" class="btn-danger">
+            🗑️ Clear All Data
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ MAP VIEW ═══════════════ -->
+  <div class="tab-panel" id="panel-map">
+    <div class="page-hdr">
+      <h2>Map View</h2>
+      <p>All logged tree locations on Google Maps — click any marker to view details</p>
+    </div>
+    <div id="big-map"></div>
+    <div class="map-legend">
+      <strong style="font-size:0.82rem;color:var(--forest);font-weight:600;">Legend:</strong>
+      <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div> Healthy</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div> Needs Attention</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div> Critical</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2563eb"></div> New (&lt; 30 days)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div> Unknown</div>
+      <span style="margin-left:auto;font-size:0.78rem;color:var(--text-3);">Powered by Google Maps</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════ GROWTH TRACKER ═══════════════ -->
+  <div class="tab-panel" id="panel-growth">
+    <div class="page-hdr">
+      <h2>Growth &amp; Survival Tracker</h2>
+      <p>Monitor health status and update records for each tree</p>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" id="search-input"
+        placeholder="🔍  Search by species or location…"
+        oninput="renderGrowthTable()" />
+      <select id="filter-health" onchange="renderGrowthTable()">
+        <option value="">All health statuses</option>
+        <option value="healthy">Healthy</option>
+        <option value="attention">Needs Attention</option>
+        <option value="critical">Critical</option>
+        <option value="new">New</option>
+      </select>
+      <select id="filter-species" onchange="renderGrowthTable()">
+        <option value="">All species</option>
+      </select>
+    </div>
+
+    <div class="card trees-table-wrap">
+      <table id="growth-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Species</th>
+            <th>Location</th>
+            <th>Date Planted</th>
+            <th>Qty</th>
+            <th>Age (days)</th>
+            <th>Health</th>
+            <th>Planted By</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="growth-tbody">
+          <tr><td colspan="9" class="empty-state">No trees logged yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status">✅ <span id="toast-msg"></span></div>
+
+<!-- ─────────────── JAVASCRIPT ─────────────── -->
+<script>
+// ═══════ DATA LAYER ═══════
+const STORAGE_KEY = 'vanaraksha_trees_v1';
+let trees = [];
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) trees = JSON.parse(raw);
+    else trees = getSampleData();
+  } catch(e) { trees = []; }
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(trees));
+}
+
+function getSampleData() {
+  return [
+    { id: uid(), species: 'Neem (Azadirachta indica)', date: '2024-03-15', qty: 5, location: 'College Campus, Block A', lat: 31.128, lng: 75.7921, planter: 'EVS Club', notes: 'Near main gate', health: 'healthy' },
+    { id: uid(), species: 'Peepal (Ficus religiosa)', date: '2024-04-02', qty: 3, location: 'City Park, Sector 3', lat: 31.135, lng: 75.801, planter: 'NSS Unit', notes: 'Good soil moisture', health: 'healthy' },
+    { id: uid(), species: 'Banyan (Ficus benghalensis)', date: '2024-04-20', qty: 2, location: 'Roadside, NH-44', lat: 31.12, lng: 75.785, planter: 'Divya Sharma', notes: 'Sandy soil, needs watering', health: 'attention' },
+    { id: uid(), species: 'Mango (Mangifera indica)', date: '2024-05-05', qty: 8, location: 'School Ground, DAV', lat: 31.142, lng: 75.796, planter: 'NCC Cadets', notes: 'Fruit trees for shade', health: 'healthy' },
+    { id: uid(), species: 'Gulmohar (Delonix regia)', date: '2024-05-18', qty: 4, location: 'College Campus, Block B', lat: 31.129, lng: 75.793, planter: 'EVS Club', notes: '', health: 'new' },
+  ];
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+// ═══════ LIVE LOCATION ═══════
+let capturedLat = null, capturedLng = null;
+
+function requestLiveLocation() {
+  const btn    = document.getElementById('geo-btn');
+  const status = document.getElementById('location-status');
+  const pill   = document.getElementById('coords-pill');
+  const card   = document.getElementById('location-card');
+
+  if (!navigator.geolocation) {
+    status.innerHTML = '❌ Geolocation is not supported by your browser.';
+    status.style.color = 'var(--danger)';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Requesting permission…';
+  status.innerHTML = '';
+  pill.style.display = 'none';
+  card.classList.remove('captured');
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      capturedLat = pos.coords.latitude;
+      capturedLng = pos.coords.longitude;
+      const acc = Math.round(pos.coords.accuracy);
+
+      btn.disabled = false;
+      btn.innerHTML = '✅ Location Captured — Tap to Refresh';
+      status.style.color = 'var(--good)';
+      status.innerHTML = `Accuracy: ±${acc}m`;
+      pill.style.display = 'inline-flex';
+      pill.textContent = `${capturedLat.toFixed(5)}, ${capturedLng.toFixed(5)}`;
+      card.classList.add('captured');
+    },
+    function(err) {
+      btn.disabled = false;
+      btn.innerHTML = '📍 Use My Current Location';
+      status.style.color = 'var(--danger)';
+      const msgs = {
+        1: 'Permission denied. Enable location in browser settings.',
+        2: 'Position unavailable right now. Try again.',
+        3: 'Request timed out. Try again.',
+      };
+      status.innerHTML = '❌ ' + (msgs[err.code] || 'Unknown error.');
+    },
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+  );
+}
+
+// ═══════ GOOGLE MAPS ═══════
+let bigMap, bigMarkers = [], infoWindow = null;
+
+function initBigMap() {
+  if (bigMap) { renderBigMap(); return; }
+  bigMap = new google.maps.Map(document.getElementById('big-map'), {
+    center: { lat: 20.5937, lng: 78.9629 },
+    zoom: 5,
+    mapTypeControl: true,
+    streetViewControl: false,
+    fullscreenControl: true,
+    styles: [
+      { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#d1fae5' }] },
+      { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#bfdbfe' }] },
+      { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#f1f5f9' }] },
+      { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#e2e8f0' }] },
+    ]
+  });
+  infoWindow = new google.maps.InfoWindow();
+  renderBigMap();
+}
+
+function renderBigMap() {
+  bigMarkers.forEach(m => m.setMap(null));
+  bigMarkers = [];
+  const withCoords = trees.filter(t => t.lat && t.lng);
+  if (!withCoords.length) return;
+  const bounds = new google.maps.LatLngBounds();
+
+  withCoords.forEach(t => {
+    const color = healthColor(t);
+    const marker = new google.maps.Marker({
+      position: { lat: t.lat, lng: t.lng },
+      map: bigMap,
+      title: t.species,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 11,
+        fillColor: color,
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 2.5,
+      }
+    });
+
+    marker.addListener('click', () => {
+      infoWindow.setContent(`
+        <div style="font-family:'Inter',sans-serif;font-size:0.875rem;line-height:1.65;min-width:200px;padding:4px 2px;">
+          <div style="font-family:'Lora',serif;font-size:1rem;font-weight:600;color:#14532d;margin-bottom:6px;">${t.species}</div>
+          <div style="color:#475569;margin-bottom:3px;">📍 ${t.location}</div>
+          <div style="color:#475569;margin-bottom:3px;">📅 ${t.date}</div>
+          <div style="color:#475569;margin-bottom:3px;">🌿 Qty: ${t.qty}</div>
+          <div style="color:#475569;margin-bottom:3px;">👤 ${t.planter || '—'}</div>
+          <div style="margin-top:8px;">
+            <span style="padding:2px 10px;border-radius:100px;font-size:0.72rem;font-weight:600;background:${healthBg(t)};color:${color};">
+              ${t.health || 'unknown'}
+            </span>
+          </div>
+          ${t.notes ? `<div style="margin-top:8px;font-style:italic;color:#94a3b8;font-size:0.8rem;">${t.notes}</div>` : ''}
+        </div>
+      `);
+      infoWindow.open(bigMap, marker);
+    });
+
+    bigMarkers.push(marker);
+    bounds.extend({ lat: t.lat, lng: t.lng });
+  });
+
+  bigMap.fitBounds(bounds);
+  if (withCoords.length === 1) bigMap.setZoom(14);
+}
+
+function healthColor(t) {
+  const age = Math.floor((Date.now() - new Date(t.date)) / 86400000);
+  if (age < 30) return '#2563eb';
+  switch (t.health) {
+    case 'healthy':   return '#16a34a';
+    case 'attention': return '#d97706';
+    case 'critical':  return '#dc2626';
+    default:          return '#7c3aed';
+  }
+}
+function healthBg(t) {
+  const age = Math.floor((Date.now() - new Date(t.date)) / 86400000);
+  if (age < 30) return '#eff6ff';
+  switch (t.health) {
+    case 'healthy':   return '#f0fdf4';
+    case 'attention': return '#fffbeb';
+    case 'critical':  return '#fef2f2';
+    default:          return '#f5f3ff';
+  }
+}
+
+// ═══════ ADD TREE ═══════
+function addTree() {
+  const species  = document.getElementById('f-species').value.trim();
+  const date     = document.getElementById('f-date').value;
+  const qty      = parseInt(document.getElementById('f-qty').value) || 1;
+  const location = document.getElementById('f-location').value.trim();
+  const planter  = document.getElementById('f-planter').value.trim();
+  const notes    = document.getElementById('f-notes').value.trim();
+
+  if (!species)  { alert('Please enter the tree species.'); return; }
+  if (!date)     { alert('Please select the date planted.'); return; }
+  if (!location) { alert('Please enter the location name.'); return; }
+
+  const tree = { id: uid(), species, date, qty, location,
+    lat: capturedLat, lng: capturedLng,
+    planter, notes, health: 'new', healthLog: [] };
+
+  trees.unshift(tree);
+  saveData();
+  refreshAll();
+  showToast(`🌱 ${qty} ${species.split('(')[0].trim()} successfully logged!`);
+  resetForm();
+}
+
+function resetForm() {
+  ['f-species','f-date','f-location','f-planter','f-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('f-qty').value = 1;
+  document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
+  capturedLat = null; capturedLng = null;
+
+  const btn = document.getElementById('geo-btn');
+  if (btn) btn.innerHTML = '📍 Use My Current Location';
+  const status = document.getElementById('location-status');
+  if (status) { status.innerHTML = ''; status.style.color = ''; }
+  const pill = document.getElementById('coords-pill');
+  if (pill) pill.style.display = 'none';
+  const card = document.getElementById('location-card');
+  if (card) card.classList.remove('captured');
+}
+
+// ═══════ DASHBOARD ═══════
+function refreshAll() {
+  renderHeaderStats();
+  renderDashboard();
+  renderGrowthTable();
+  renderSpeciesFilter();
+  if (bigMap) renderBigMap();
+}
+
+function renderHeaderStats() {
+  const total   = trees.reduce((s,t) => s + t.qty, 0);
+  const alive   = trees.filter(t => t.health === 'healthy' || t.health === 'new').reduce((s,t) => s + t.qty, 0);
+  const species = new Set(trees.map(t => t.species)).size;
+  document.getElementById('h-total').textContent   = total;
+  document.getElementById('h-alive').textContent   = alive;
+  document.getElementById('h-species').textContent = species;
+}
+
+function renderDashboard() {
+  const total     = trees.reduce((s,t) => s + t.qty, 0);
+  const healthy   = trees.filter(t => t.health === 'healthy').reduce((s,t) => s + t.qty, 0);
+  const attention = trees.filter(t => t.health === 'attention' || t.health === 'critical').reduce((s,t) => s + t.qty, 0);
+  const speciesSet= new Set(trees.map(t => t.species)).size;
+  const locSet    = new Set(trees.map(t => t.location)).size;
+  const now = new Date();
+  const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const thisMonth = trees.filter(t => t.date && t.date.startsWith(ym)).reduce((s,t) => s + t.qty, 0);
+
+  document.getElementById('s-total').textContent         = total;
+  document.getElementById('s-alive').textContent         = healthy;
+  document.getElementById('s-attention').textContent     = attention;
+  document.getElementById('s-species-count').textContent = speciesSet;
+  document.getElementById('s-locations').textContent     = locSet;
+  document.getElementById('s-this-month').textContent    = thisMonth;
+
+  renderSpeciesChart();
+  renderMonthlyChart();
+  renderActivityList();
+  renderSurvivalStats();
+}
+
+function renderSpeciesChart() {
+  const map = {};
+  trees.forEach(t => { map[t.species] = (map[t.species] || 0) + t.qty; });
+  const sorted = Object.entries(map).sort((a,b) => b[1]-a[1]).slice(0, 8);
+  const max = sorted[0]?.[1] || 1;
+  const el = document.getElementById('species-chart');
+  if (!sorted.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🌿</div><div>No data yet</div></div>';
+    return;
+  }
+  el.innerHTML = sorted.map(([name, cnt]) => `
+    <div class="species-row">
+      <div class="species-name" title="${name}">${name.split('(')[0].trim()}</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${(cnt/max*100).toFixed(1)}%"></div></div>
+      <div class="bar-count">${cnt}</div>
+    </div>
+  `).join('');
+}
+
+function renderMonthlyChart() {
+  const map = {};
+  trees.forEach(t => {
+    if (!t.date) return;
+    const m = t.date.slice(0,7);
+    map[m] = (map[m] || 0) + t.qty;
+  });
+  const keys = Object.keys(map).sort().slice(-8);
+  const max = Math.max(...keys.map(k => map[k]), 1);
+  const el = document.getElementById('monthly-chart');
+  if (!keys.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div>No data yet</div></div>';
+    return;
+  }
+  el.innerHTML = `<div class="month-chart">` +
+    keys.map(k => {
+      const h = Math.round((map[k]/max) * 95);
+      const lbl = new Date(k + '-01').toLocaleDateString('en-IN', { month: 'short' });
+      return `<div class="month-col">
+        <div class="month-bar" style="height:${h}px" data-count="${map[k]}"></div>
+        <div class="month-label">${lbl}</div>
+      </div>`;
+    }).join('') + `</div>`;
+}
+
+function renderActivityList() {
+  const el = document.getElementById('activity-list');
+  if (!trees.length) {
+    el.innerHTML = '<li class="empty-state"><div class="empty-icon">🌱</div><div>No activity yet</div></li>';
+    return;
+  }
+  el.innerHTML = trees.slice(0, 6).map(t => `
+    <li class="activity-item">
+      <div class="activity-dot"></div>
+      <div>
+        <div class="activity-text">${t.qty} × ${t.species.split('(')[0].trim()} at ${t.location}</div>
+        <div class="activity-date">${t.date}${t.planter ? ' · ' + t.planter : ''}</div>
+      </div>
+    </li>
+  `).join('');
+}
+
+function renderSurvivalStats() {
+  const el    = document.getElementById('survival-stats');
+  const total = trees.reduce((s,t) => s + t.qty, 0);
+  if (!total) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><div>No data yet</div></div>';
+    return;
+  }
+  const counts = { healthy:0, new:0, attention:0, critical:0 };
+  trees.forEach(t => { counts[t.health] = (counts[t.health] || 0) + t.qty; });
+  const items = [
+    { label: 'Healthy',        val: counts.healthy   || 0, color: '#16a34a' },
+    { label: 'New Plantings',  val: counts.new       || 0, color: '#2563eb' },
+    { label: 'Needs Attention',val: counts.attention || 0, color: '#d97706' },
+    { label: 'Critical',       val: counts.critical  || 0, color: '#dc2626' },
+  ];
+  el.innerHTML = items.map(item => `
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:5px;">
+        <span style="color:var(--text);font-weight:500;">${item.label}</span>
+        <span style="color:var(--text-3);font-size:0.78rem;">${item.val} &nbsp;(${total ? Math.round(item.val/total*100) : 0}%)</span>
+      </div>
+      <div class="survival-bar">
+        <div class="survival-fill" style="width:${total ? item.val/total*100 : 0}%;background:${item.color}"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════ GROWTH TABLE ═══════
+function renderGrowthTable() {
+  const query = (document.getElementById('search-input')?.value || '').toLowerCase();
+  const hFil  = document.getElementById('filter-health')?.value  || '';
+  const sFil  = document.getElementById('filter-species')?.value || '';
+  const tbody = document.getElementById('growth-tbody');
+  const today = Date.now();
+
+  const filtered = trees.filter(t => {
+    if (query && !t.species.toLowerCase().includes(query) && !t.location.toLowerCase().includes(query)) return false;
+    if (hFil && t.health !== hFil) return false;
+    if (sFil && t.species !== sFil) return false;
+    return true;
+  });
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-state" style="padding:2rem">No trees match the filter.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((t, i) => {
+    const age = Math.floor((today - new Date(t.date)) / 86400000);
+    const hBadge = {
+      healthy:   '<span class="badge badge-good">Healthy</span>',
+      attention: '<span class="badge badge-warn">Needs Attention</span>',
+      critical:  '<span class="badge badge-bad">Critical</span>',
+      new:       '<span class="badge badge-new">New</span>',
+    }[t.health] || '<span class="badge">Unknown</span>';
+
+    return `
+      <tr>
+        <td style="color:var(--text-3);font-size:0.75rem;font-weight:500;">${i+1}</td>
+        <td>
+          <div style="font-weight:600;color:var(--text);">${t.species.split('(')[0].trim()}</div>
+          <div style="font-size:0.72rem;color:var(--text-3);">${t.species.includes('(') ? t.species.match(/\(([^)]+)\)/)?.[1] : ''}</div>
+        </td>
+        <td style="color:var(--text-2);">${t.location}</td>
+        <td style="color:var(--text-2);white-space:nowrap;">${t.date}</td>
+        <td style="text-align:center;font-weight:600;">${t.qty}</td>
+        <td style="text-align:center;color:var(--text-2);">${age}</td>
+        <td>${hBadge}</td>
+        <td style="color:var(--text-3);">${t.planter || '—'}</td>
+        <td>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;">
+            <button class="health-btn" onclick="cycleHealth('${t.id}')">Update</button>
+            <button class="btn-del" onclick="deleteTree('${t.id}')">Delete</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderSpeciesFilter() {
+  const sel = document.getElementById('filter-species');
+  if (!sel) return;
+  const current = sel.value;
+  const species = [...new Set(trees.map(t => t.species))].sort();
+  sel.innerHTML = '<option value="">All species</option>' +
+    species.map(s => `<option value="${s}"${s===current?' selected':''}>${s.split('(')[0].trim()}</option>`).join('');
+}
+
+function cycleHealth(id) {
+  const states = ['new','healthy','attention','critical'];
+  const tree = trees.find(t => t.id === id);
+  if (!tree) return;
+  tree.health = states[(states.indexOf(tree.health) + 1) % states.length];
+  if (!tree.healthLog) tree.healthLog = [];
+  tree.healthLog.push({ date: new Date().toISOString().slice(0,10), status: tree.health });
+  saveData(); refreshAll();
+  showToast(`Health updated → ${tree.health}`);
+}
+
+function deleteTree(id) {
+  if (!confirm('Delete this tree record?')) return;
+  trees = trees.filter(t => t.id !== id);
+  saveData(); refreshAll();
+  showToast('Tree record deleted.');
+}
+
+// ═══════ EXPORT / IMPORT ═══════
+function exportData() {
+  const json = JSON.stringify({ version:1, exportedAt: new Date().toISOString(), trees }, null, 2);
+  const a = document.createElement('a');
+  a.href = 'data:application/json,' + encodeURIComponent(json);
+  a.download = 'vanaraksha_trees.json';
+  a.click();
+  showToast('Data exported successfully!');
+}
+function importTrigger() { document.getElementById('import-file').click(); }
+function importData(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      const imported = data.trees || data;
+      if (!Array.isArray(imported)) throw new Error();
+      trees = imported; saveData(); refreshAll();
+      showToast(`${imported.length} trees imported!`);
+    } catch { alert('Invalid file format. Please use a VanaRaksha JSON export.'); }
+  };
+  reader.readAsText(file);
+}
+function clearAll() { trees = []; saveData(); refreshAll(); showToast('All data cleared.'); }
+
+// ═══════ ONLINE IMPORT ═══════
+let importResults = [];
+let activeSource  = 'inat';
+
+const SOURCE_META = {
+  inat: {
+    label: 'iNaturalist',
+    badge: 'badge-inat',
+    desc:  '🌿 Real-world plant sightings with GPS, photos and species IDs from the global naturalist community. Free — no API key needed.',
+    defaultRadius: 25,
+  },
+  gbif: {
+    label: 'GBIF',
+    badge: 'badge-gbif',
+    desc:  '🔬 Global Biodiversity Information Facility — scientific species occurrence records from museums, herbaria and field surveys worldwide.',
+    defaultRadius: 50,
+  },
+  osm: {
+    label: 'OpenStreetMap',
+    badge: 'badge-osm',
+    desc:  '🗺️ Trees mapped by volunteers in OpenStreetMap. Best for urban areas with detailed mapping. Pulls nodes tagged natural=tree.',
+    defaultRadius: 2,
+  },
+};
+
+function openImportModal() {
+  document.getElementById('import-modal').classList.add('open');
+  setActiveSource('inat');
+  document.getElementById('im-results').innerHTML =
+    '<div class="results-status">Set a location and click <strong>Fetch Data</strong> to search.</div>';
+  document.getElementById('im-count').textContent = '';
+  document.getElementById('im-confirm').disabled = true;
+  importResults = [];
+}
+
+function closeImportModal() {
+  document.getElementById('import-modal').classList.remove('open');
+}
+
+function setActiveSource(src) {
+  activeSource = src;
+  document.querySelectorAll('.source-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.src === src);
+  });
+  const meta = SOURCE_META[src];
+  document.getElementById('im-desc').textContent = meta.desc;
+  const r = document.getElementById('im-radius');
+  if (r) r.value = meta.defaultRadius;
+}
+
+async function useMyLocationForImport() {
+  const btn = document.getElementById('im-locate-btn');
+  btn.textContent = '…';
+  btn.disabled = true;
+  return new Promise(resolve => {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        document.getElementById('im-lat').value = pos.coords.latitude.toFixed(5);
+        document.getElementById('im-lng').value = pos.coords.longitude.toFixed(5);
+        btn.textContent = '✅';
+        btn.disabled = false;
+        resolve();
+      },
+      () => {
+        btn.textContent = '📍';
+        btn.disabled = false;
+        alert('Could not get location. Please enter coordinates manually.');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  });
+}
+
+async function fetchOnlineData() {
+  const lat    = parseFloat(document.getElementById('im-lat').value);
+  const lng    = parseFloat(document.getElementById('im-lng').value);
+  const radius = parseInt(document.getElementById('im-radius').value) || 25;
+  const query  = document.getElementById('im-species').value.trim();
+
+  if (isNaN(lat) || isNaN(lng)) {
+    alert('Please enter valid latitude and longitude, or use the 📍 button.'); return;
+  }
+
+  const btn = document.getElementById('im-fetch-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Fetching…';
+  document.getElementById('im-results').innerHTML =
+    '<div class="results-status"><span class="spinner" style="border-color:rgba(0,0,0,0.15);border-top-color:var(--leaf);"></span>&nbsp; Contacting database…</div>';
+  document.getElementById('im-confirm').disabled = true;
+  importResults = [];
+
+  try {
+    if      (activeSource === 'inat') await fetchInat(lat, lng, radius, query);
+    else if (activeSource === 'gbif') await fetchGBIF(lat, lng, radius, query);
+    else if (activeSource === 'osm')  await fetchOSM(lat, lng, radius);
+  } catch (err) {
+    document.getElementById('im-results').innerHTML =
+      `<div class="results-status">❌ Failed: ${err.message}.<br/>Check your connection or try a different source.</div>`;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '🔍 Fetch Data';
+  renderImportResults();
+}
+
+// ── iNaturalist ──
+async function fetchInat(lat, lng, radius, query) {
+  const taxon = query || 'Plantae';
+  const url = `https://api.inaturalist.org/v1/observations?` +
+    `taxon_name=${encodeURIComponent(taxon)}&` +
+    `lat=${lat}&lng=${lng}&radius=${radius}&` +
+    `quality_grade=research&has[]=geo&order_by=created_at&per_page=60`;
+
+  const res  = await fetch(url);
+  if (!res.ok) throw new Error(`iNaturalist ${res.status}`);
+  const data = await res.json();
+
+  importResults = (data.results || []).map(obs => {
+    const coords  = obs.geojson?.coordinates;
+    const sciName = obs.taxon?.name || '';
+    const common  = obs.taxon?.preferred_common_name || '';
+    const cap     = s => s.charAt(0).toUpperCase() + s.slice(1);
+    const species = common ? `${cap(common)} (${sciName})` : sciName || 'Unknown plant';
+    return {
+      id:       uid(),
+      species,
+      date:     obs.observed_on || new Date().toISOString().slice(0,10),
+      qty:      1,
+      location: obs.place_guess || `${lat.toFixed(3)}, ${lng.toFixed(3)}`,
+      lat:      coords ? coords[1] : null,
+      lng:      coords ? coords[0] : null,
+      planter:  obs.user?.login || '',
+      notes:    obs.description ? obs.description.slice(0,200) : '',
+      health: 'new', healthLog: [],
+      _source: 'inat', _checked: true,
+    };
+  });
+}
+
+// ── GBIF ──
+async function fetchGBIF(lat, lng, radius, query) {
+  const deg = radius / 111;
+  const url = `https://api.gbif.org/v1/occurrence/search?` +
+    `kingdom=Plantae&` +
+    (query ? `scientificName=${encodeURIComponent(query)}&` : '') +
+    `decimalLatitude=${(lat-deg).toFixed(4)},${(lat+deg).toFixed(4)}&` +
+    `decimalLongitude=${(lng-deg).toFixed(4)},${(lng+deg).toFixed(4)}&` +
+    `hasCoordinate=true&hasGeospatialIssue=false&limit=60`;
+
+  const res  = await fetch(url);
+  if (!res.ok) throw new Error(`GBIF ${res.status}`);
+  const data = await res.json();
+
+  importResults = (data.results || []).map(occ => {
+    const sci     = occ.species || occ.scientificName || 'Unknown';
+    const common  = occ.vernacularName || '';
+    const species = common ? `${common} (${sci})` : sci;
+    return {
+      id:       uid(),
+      species,
+      date:     occ.eventDate ? occ.eventDate.slice(0,10) : new Date().toISOString().slice(0,10),
+      qty:      1,
+      location: occ.locality || occ.stateProvince || `${lat.toFixed(3)}, ${lng.toFixed(3)}`,
+      lat:      occ.decimalLatitude  || null,
+      lng:      occ.decimalLongitude || null,
+      planter:  occ.recordedBy || '',
+      notes:    `Dataset: ${occ.datasetName || 'GBIF'}`,
+      health: 'new', healthLog: [],
+      _source: 'gbif', _checked: true,
+    };
+  });
+}
+
+// ── OpenStreetMap Overpass ──
+async function fetchOSM(lat, lng, radius) {
+  const delta = radius / 111;
+  const bbox  = `${lat-delta},${lng-delta},${lat+delta},${lng+delta}`;
+  const q     = `[out:json][timeout:25];(node["natural"="tree"](${bbox});way["natural"="tree"](${bbox}););out center 80;`;
+
+  const res  = await fetch('https://overpass-api.de/api/interpreter', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'data=' + encodeURIComponent(q),
+  });
+  if (!res.ok) throw new Error(`Overpass ${res.status}`);
+  const data = await res.json();
+
+  importResults = (data.elements || []).map(el => {
+    const tags   = el.tags || {};
+    const rawSp  = tags['species'] || tags['taxon'] || tags['species:en'] || '';
+    const common = tags['name'] || tags['species:common'] || '';
+    const lat2   = el.lat ?? el.center?.lat ?? lat;
+    const lng2   = el.lon ?? el.center?.lon ?? lng;
+    const species = common
+      ? `${common}${rawSp ? ' (' + rawSp + ')' : ''}`
+      : rawSp || 'Tree (unidentified)';
+    return {
+      id:       uid(),
+      species,
+      date:     tags['plant:start_date'] || new Date().toISOString().slice(0,10),
+      qty:      1,
+      location: tags['addr:city'] || tags['addr:street'] || `${lat2.toFixed(4)}, ${lng2.toFixed(4)}`,
+      lat:      lat2,
+      lng:      lng2,
+      planter:  '',
+      notes:    tags['note'] || tags['description'] || `OSM #${el.id}`,
+      health: 'new', healthLog: [],
+      _source: 'osm', _checked: true,
+    };
+  });
+}
+
+// ── Render results list ──
+function renderImportResults() {
+  const el   = document.getElementById('im-results');
+  const meta = SOURCE_META[activeSource];
+
+  if (!importResults.length) {
+    el.innerHTML = '<div class="results-status">No results found. Try a larger radius or different search term.</div>';
+    document.getElementById('im-count').textContent = '';
+    document.getElementById('im-confirm').disabled = true;
+    return;
+  }
+
+  const rows = importResults.map((r, i) => `
+    <div class="import-result-item" onclick="toggleCheck(${i})">
+      <input type="checkbox" ${r._checked ? 'checked' : ''}
+        onclick="event.stopPropagation();toggleCheck(${i})" />
+      <div class="import-result-info">
+        <div class="import-result-species">${r.species}</div>
+        <div class="import-result-meta">
+          📍 ${r.location} &nbsp;·&nbsp; 📅 ${r.date}
+          ${r.lat ? ` &nbsp;·&nbsp; ${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}` : ''}
+        </div>
+      </div>
+      <span class="import-source-badge ${meta.badge}">${meta.label}</span>
+    </div>
+  `).join('');
+
+  el.innerHTML = `
+    <div class="select-all-row">
+      <input type="checkbox" id="select-all-cb" checked
+        onchange="toggleSelectAll(this.checked)" />
+      <label for="select-all-cb" style="cursor:pointer;">Select all</label>
+    </div>
+    ${rows}
+  `;
+  updateImportFooter();
+}
+
+function toggleCheck(i) {
+  importResults[i]._checked = !importResults[i]._checked;
+  renderImportResults();
+}
+
+function toggleSelectAll(checked) {
+  importResults.forEach(r => r._checked = checked);
+  renderImportResults();
+}
+
+function updateImportFooter() {
+  const sel = importResults.filter(r => r._checked).length;
+  document.getElementById('im-count').textContent =
+    sel > 0
+      ? `${sel} of ${importResults.length} selected`
+      : `${importResults.length} found — none selected`;
+  document.getElementById('im-confirm').disabled = (sel === 0);
+}
+
+// ── Confirm import ──
+function confirmOnlineImport() {
+  const selected = importResults
+    .filter(r => r._checked)
+    .map(r => { const { _source, _checked, ...clean } = r; return clean; });
+
+  if (!selected.length) return;
+
+  let added = 0;
+  selected.forEach(newT => {
+    const dupe = trees.some(t =>
+      t.species === newT.species && t.date === newT.date &&
+      Math.abs((t.lat || 0) - (newT.lat || 0)) < 0.0005 &&
+      Math.abs((t.lng || 0) - (newT.lng || 0)) < 0.0005
+    );
+    if (!dupe) { trees.unshift(newT); added++; }
+  });
+
+  saveData(); refreshAll(); closeImportModal();
+  const skipped = selected.length - added;
+  showToast(`🌐 ${added} imported from ${SOURCE_META[activeSource].label}${skipped ? ` (${skipped} duplicate${skipped>1?'s':''} skipped)` : ''}!`);
+}
+
+// ═══════ TABS ═══════
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.getAttribute('onclick')?.includes("'" + name + "'")) b.classList.add('active');
+  });
+  if (name === 'map') {
+    if (typeof google !== 'undefined' && google.maps) initBigMap();
+    else document.getElementById('big-map').innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-3);font-size:0.9rem;">⏳ Loading Google Maps…</div>';
+  }
+}
+
+// ═══════ TOAST ═══════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ═══════ GOOGLE MAPS CALLBACK ═══════
+function initGoogleMaps() {
+  if (document.getElementById('panel-map').classList.contains('active')) initBigMap();
+}
+
+// ═══════ INIT ═══════
+document.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
+  refreshAll();
+});
+</script>
+
+<!-- Google Maps API -->
+<script async
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAnPrByTqqhDoQnL1YlrLk3nJFegllbDlc&callback=initGoogleMaps">
+</script>
+
+<!-- ═══ ONLINE IMPORT MODAL ═══ -->
+<div class="modal-overlay" id="import-modal" onclick="if(event.target===this)closeImportModal()">
+  <div class="modal">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-header-icon">🌐</div>
+        <div>
+          <h3>Import from Online Sources</h3>
+          <p>Fetch real tree &amp; plant data from free public databases</p>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeImportModal()" title="Close">✕</button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+
+      <!-- Source selector -->
+      <div class="source-tabs">
+        <button class="source-tab active" data-src="inat" onclick="setActiveSource('inat')">
+          🌿 iNaturalist
+        </button>
+        <button class="source-tab" data-src="gbif" onclick="setActiveSource('gbif')">
+          🔬 GBIF
+        </button>
+        <button class="source-tab" data-src="osm" onclick="setActiveSource('osm')">
+          🗺️ OpenStreetMap
+        </button>
+      </div>
+
+      <!-- Source description -->
+      <div class="source-desc">
+        <span class="source-desc-icon">🌿</span>
+        <span id="im-desc">Real-world plant sightings with GPS, photos and species IDs from the global naturalist community. Free — no API key needed.</span>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-row">
+        <div class="form-group">
+          <label for="im-lat">Latitude</label>
+          <input type="number" id="im-lat" placeholder="e.g. 28.6139" step="any" />
+        </div>
+        <div class="form-group">
+          <label for="im-lng">Longitude</label>
+          <div style="display:flex;gap:6px;">
+            <input type="number" id="im-lng" placeholder="e.g. 77.2090" step="any" style="flex:1;" />
+            <button id="im-locate-btn" title="Use my location"
+              onclick="useMyLocationForImport()"
+              style="padding:0.6rem 0.75rem;border:1.5px solid var(--border);border-radius:var(--r-md);background:var(--surface);cursor:pointer;font-size:1rem;flex-shrink:0;transition:all 0.15s;">
+              📍
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <div class="form-group">
+          <label for="im-radius">Radius (km)</label>
+          <input type="number" id="im-radius" value="25" min="1" max="500" />
+        </div>
+        <div class="form-group">
+          <label for="im-species">Species / keyword <span style="font-weight:400;text-transform:none;">(optional)</span></label>
+          <input type="text" id="im-species" placeholder="e.g. Ficus, Neem, Plantae…" />
+        </div>
+      </div>
+
+      <button class="fetch-btn" id="im-fetch-btn" onclick="fetchOnlineData()">
+        🔍 Fetch Data
+      </button>
+
+      <!-- Results -->
+      <div class="import-results" id="im-results">
+        <div class="results-status">Set a location and click <strong>Fetch Data</strong> to search.</div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <span class="modal-footer-left" id="im-count"></span>
+      <div class="modal-footer-right">
+        <button class="cancel-btn" onclick="closeImportModal()">Cancel</button>
+        <button class="import-confirm-btn" id="im-confirm" onclick="confirmOnlineImport()" disabled>
+          ⬇️ Import Selected
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
